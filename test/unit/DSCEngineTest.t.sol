@@ -20,7 +20,6 @@ contract DSCEngineTest is Test {
     uint256 public constant AMOUNT_COLLATERAL = 10 ether;
     uint256 public constant STARTING_ERC20_BALANCE = 10 ether;
 
-
     function setUp() public {
         deployDSC = new DeployDSC();
         (dsc, engine, helperConfig) = deployDSC.run();
@@ -46,7 +45,6 @@ contract DSCEngineTest is Test {
     // Deposit collateral tests     //
     //////////////////////////
 
-
     function testRevertIfCollateralZero() public {
         vm.startPrank(USER);
         ERC20Mock(weth).approve(address(engine), AMOUNT_COLLATERAL);
@@ -54,6 +52,5 @@ contract DSCEngineTest is Test {
         vm.expectRevert(DSCEngine.DSCEngine__MustBeMoretThanZero.selector);
         engine.depositCollateral(weth, 0);
         vm.stopPrank();
-
     }
 }
