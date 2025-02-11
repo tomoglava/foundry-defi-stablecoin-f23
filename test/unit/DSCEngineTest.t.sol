@@ -29,7 +29,7 @@ contract DSCEngineTest is Test {
     }
 
     //////////////////////////
-    // Price tests     //
+    // Price tests          //
     //////////////////////////
 
     function testGetUsdValue() public view {
@@ -41,9 +41,9 @@ contract DSCEngineTest is Test {
         assertEq(actualUsdValue, expectedUsdValue);
     }
 
-    //////////////////////////
+    //////////////////////////////////
     // Deposit collateral tests     //
-    //////////////////////////
+    //////////////////////////////////
 
     function testRevertIfCollateralZero() public {
         vm.startPrank(USER);
@@ -51,6 +51,31 @@ contract DSCEngineTest is Test {
 
         vm.expectRevert(DSCEngine.DSCEngine__MustBeMoretThanZero.selector);
         engine.depositCollateral(weth, 0);
+        vm.stopPrank();
+    }
+
+    function testWhenCollateralMoreThanZero() public {
+        vm.startPrank(USER);
+        ERC20Mock(weth).approve(address(engine), AMOUNT_COLLATERAL);
+
+        engine.depositCollateral(weth, AMOUNT_COLLATERAL);
+
+        uint256 userCollateralBalance = engine.getAccountCollateralOfToken(USER, weth);
+        assertEq(userCollateralBalance, AMOUNT_COLLATERAL);
+
+        vm.stopPrank();
+    }
+
+    ///////////////////////////////
+    // Allowing token tests      //
+    ///////////////////////////////
+
+    function testRevertIfTokenNotSupported() public {
+        vm.startPrank(USER);
+        ERC20Mock(weth).approve(address(engine), AMOUNT_COLLATERAL);
+
+        vm.expectRevert(DSCEngine.DSCEngine__TokenNotSupported.selector);
+        engine.depositCollateral(makeAddr("notSupportedToken"), AMOUNT_COLLATERAL);
         vm.stopPrank();
     }
 }
