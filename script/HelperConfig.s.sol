@@ -7,7 +7,6 @@ import {ERC20Mock} from "../test/mocks/ERC20Mock.sol";
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
 contract HelperConfig is Script {
-
     struct NetworkConfig {
         int256 ethPrice;
         address wethUsdPriceFeed;

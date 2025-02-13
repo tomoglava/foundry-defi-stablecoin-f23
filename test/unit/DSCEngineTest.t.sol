@@ -32,7 +32,6 @@ contract DSCEngineTest is Test {
         (ethPrice, ethUsdPriceFeed, btcUsdPriceFeed, weth,,) = helperConfig.activeNetworkConfig();
 
         ethPrice = ethPrice * ADDITIONAL_FEED_PRECISION;
-        console.log("ethPrice: %d", ethPrice);
 
         ERC20Mock(weth).mint(USER, STARTING_ERC20_BALANCE);
     }
@@ -52,6 +51,9 @@ contract DSCEngineTest is Test {
         new DSCEngine(tokenAddresses, priceFeedAddresses, address(dsc));
     }
 
+    //////////////////////////
+    // Modifier tests       //
+    //////////////////////////
 
     //////////////////////////
     // Price tests          //
@@ -71,7 +73,6 @@ contract DSCEngineTest is Test {
         uint256 expectedWeth = 0.05 ether;
         uint256 actualWeth = engine.getTokenAmountFromUsd(weth, usdAmount);
         assertEq(actualWeth, expectedWeth);
-
     }
 
     //////////////////////////////////
@@ -121,9 +122,26 @@ contract DSCEngineTest is Test {
         (uint256 totalDscMinted, uint256 collateralValueInUsd) = engine.getAccountInformation(USER);
 
         uint256 expectedTotalDscMinted = 0;
-        uint256 expectedDepositAmount = engine.getUsdValue(weth, collateralValueInUsd);
+        uint256 expectedDepositAmount = engine.getTokenAmountFromUsd(weth, collateralValueInUsd);
+
         assertEq(totalDscMinted, expectedTotalDscMinted);
         assertEq(AMOUNT_COLLATERAL, expectedDepositAmount);
-
     }
+
+    // function testDepositCollateralAndMintDsc() public depositedCollateral {
+    //     uint256 dscAmount = 1000;
+    //     engine.mintDsc(dscAmount);
+
+    //     address USER2 = makeAddr("user");
+    //     vm.startPrank(USER2);
+    //     ERC20Mock(weth).approve(address(engine), AMOUNT_COLLATERAL);
+    //     engine.depositCollateralAndMintDsc(weth, AMOUNT_COLLATERAL, dscAmount);
+    //     vm.stopPrank();
+
+    //     (uint256 totalDscMinted, uint256 collateralValueInUsd) = engine.getAccountInformation(USER);
+    //     (uint256 totalDscMinted2, uint256 collateralValueInUsd2) = engine.getAccountInformation(USER2);
+
+    //     assertEq(totalDscMinted, totalDscMinted2);
+    //     assertEq(collateralValueInUsd, collateralValueInUsd2);
+    // }
 }
