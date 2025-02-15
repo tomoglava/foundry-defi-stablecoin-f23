@@ -68,7 +68,7 @@ contract DSCEngineTest is Test {
         assertEq(actualUsdValue, expectedUsdValue);
     }
 
-    function testGetTokenAmountFromUsd() public {
+    function testGetTokenAmountFromUsd() public view {
         uint256 usdAmount = 100 ether;
         uint256 expectedWeth = 0.05 ether;
         uint256 actualWeth = engine.getTokenAmountFromUsd(weth, usdAmount);
@@ -144,4 +144,23 @@ contract DSCEngineTest is Test {
     //     assertEq(totalDscMinted, totalDscMinted2);
     //     assertEq(collateralValueInUsd, collateralValueInUsd2);
     // }
+
+    ///////////////////////////////////
+    // Mint DSC tests                //
+    ///////////////////////////////////
+
+    function testRevertIfDscAmountZero() public {
+        vm.expectRevert(DSCEngine.DSCEngine__MustBeMoretThanZero.selector);
+        engine.mintDsc(0);
+    }
+
+    function testRevertIfThereIsNoCollateralEgHealthBroken() public {
+        uint256 dscAmount = 1000;
+        vm.startPrank(USER);
+
+        vm.expectRevert();
+        engine.mintDsc(dscAmount);
+
+        vm.stopPrank();
+    }
 }
