@@ -129,6 +129,14 @@ contract DSCEngineTest is Test {
         _;
     }
 
+    modifier depositCollateral_WETH_AndMintDsc() {
+        vm.startPrank(USER);
+        ERC20Mock(weth).approve(address(engine), AMOUNT_COLLATERAL);
+        engine.depositCollateralAndMintDsc(weth, AMOUNT_COLLATERAL, 1000);
+        vm.stopPrank();
+        _;
+    }
+
     function testCanDepositCollateralAndGetAccountInfo() public depositedCollateral_WETH {
         (uint256 totalDscMinted, uint256 collateralValueInUsd) = engine.getAccountInformation(USER);
 
@@ -213,16 +221,38 @@ contract DSCEngineTest is Test {
         engine.redeemCollateral(weth, 0);
     }
 
-    //failing because of dividing with unminted Dsc in test health function
-    // function testExpectedUsdValueAfterRedeemSuccess() public depositedCollateral_WETH {
-    //     uint256 redeemAmount = 2 ether;
+    function testExpectedUsdValueAfterRedeemMintAndBurnSuccess() public depositCollateral_WETH_AndMintDsc {
+        uint256 redeemAmount = 2 ether;
 
-    //     vm.startPrank(USER);
-    //     uint256 expectedCollateralValueInUsd = engine.getUsdValue(weth, (AMOUNT_COLLATERAL - redeemAmount));
-    //     engine.redeemCollateral(weth, redeemAmount);
-    //     vm.stopPrank();
+        vm.startPrank(USER);
+        uint256 expectedCollateralValueInUsd = engine.getUsdValue(weth, (AMOUNT_COLLATERAL - redeemAmount));
 
-    //     uint256 actualCollateralValueInUsd = engine.getAccountCollateralValueInUsd(USER);
-    //     assertEq(expectedCollateralValueInUsd, actualCollateralValueInUsd);
+        //ERC20Mock(weth).approve(address(engine), redeemAmount);
+        DecentralizedStableCoin(address(engine.i_dsc())).approve(address(engine), 200);
+        engine.redeemColateralForDsc(weth, redeemAmount, 200);
+        vm.stopPrank();
+
+        uint256 actualCollateralValueInUsd = engine.getAccountCollateralValueInUsd(USER);
+        assertEq(expectedCollateralValueInUsd, actualCollateralValueInUsd);
+    }
+
+    ////////////////////////////
+    // Liquidation tests      //
+    ////////////////////////////
+
+    function testRevertIfLiquidationAmountZero() public {
+        vm.expectRevert(DSCEngine.DSCEngine__MustBeMoretThanZero.selector);
+        engine.liquidate(weth, USER, 0);
+    }
+
+    function testRevertIfHealthFactorIsOK() public depositCollateral_WETH_AndMintDsc {
+        vm.expectRevert(DSCEngine.DSCEngine__HealthFactorOK.selector);
+        engine.liquidate(weth, USER, 1000);
+    }
+
+    // function testIfHealthFactorIsntImprovedAfterLiquidation() public depositCollateral_WETH_AndMintDsc {
+
+    //     vm.expectRevert(DSCEngine.DSCEngine__HealthFactorNotImproved.selector);
+    //     engine.liquidate(weth, USER, 1000);
     // }
 }
