@@ -18,7 +18,7 @@ contract HelperConfig is Script {
 
     int256 private constant PRECISION = 1e18;
     uint8 public constant DECIMALS = 8;
-    int256 public constant WETH_ANVIL_USD_PRICE = 2000e8;
+    int256 public constant WETH_ANVIL_USD_PRICE = 2500e8;
     int256 public constant WBTC_ANVIL_USD_PRICE = 40000e8;
     uint256 public constant DEFAULT_ANVIL_PRIVATE_KEY =
         0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80;
