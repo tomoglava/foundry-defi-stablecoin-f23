@@ -16,6 +16,7 @@ contract HelperConfig is Script {
         uint256 deployerKey;
     }
 
+    int256 private constant PRECISION = 1e18;
     uint8 public constant DECIMALS = 8;
     int256 public constant WETH_ANVIL_USD_PRICE = 2000e8;
     int256 public constant WBTC_ANVIL_USD_PRICE = 40000e8;
@@ -66,5 +67,12 @@ contract HelperConfig is Script {
             wbtc: address(wbtcMock),
             deployerKey: DEFAULT_ANVIL_PRIVATE_KEY
         });
+    }
+
+    //enter the coefficient in percentage
+    function updateETHPrice(int256 coefficient) public {
+        MockV3Aggregator(address(activeNetworkConfig.wethUsdPriceFeed)).updateAnswer(
+            (WETH_ANVIL_USD_PRICE * coefficient) / PRECISION
+        );
     }
 }

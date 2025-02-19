@@ -132,7 +132,7 @@ contract DSCEngineTest is Test {
     modifier depositCollateral_WETH_AndMintDsc() {
         vm.startPrank(USER);
         ERC20Mock(weth).approve(address(engine), AMOUNT_COLLATERAL);
-        engine.depositCollateralAndMintDsc(weth, AMOUNT_COLLATERAL, 1000);
+        engine.depositCollateralAndMintDsc(weth, AMOUNT_COLLATERAL, 9e21);
         vm.stopPrank();
         _;
     }
@@ -247,12 +247,69 @@ contract DSCEngineTest is Test {
 
     function testRevertIfHealthFactorIsOK() public depositCollateral_WETH_AndMintDsc {
         vm.expectRevert(DSCEngine.DSCEngine__HealthFactorOK.selector);
-        engine.liquidate(weth, USER, 1000);
+        engine.liquidate(weth, USER, 1e21);
     }
 
     // function testIfHealthFactorIsntImprovedAfterLiquidation() public depositCollateral_WETH_AndMintDsc {
+    //     vm.prank(USER);
+    //     uint256 startingUserHealthFactor = engine.gethHealthFactor();
+    //     console.log("initialHealthFactor", startingUserHealthFactor);
+    //     (uint256 totalDscMintedBefore, uint256 collateralValueInUsBefore) = engine.getAccountInformation(USER);
+    //     console.log("totalDscMintedBefore", totalDscMintedBefore);
+    //     console.log("collateralValueInUsBefore", collateralValueInUsBefore);
 
-    //     vm.expectRevert(DSCEngine.DSCEngine__HealthFactorNotImproved.selector);
-    //     engine.liquidate(weth, USER, 1000);
+    //     helperConfig.updateETHPrice(1e17);
+
+    //     vm.prank(USER);
+    //     uint256 healthFactorAfterPriceDropped = engine.gethHealthFactor();
+    //     console.log("expectedHealthFactor", healthFactorAfterPriceDropped);
+    //     (uint256 totalDscMintedAfter, uint256 collateralValueInUsdAfter) = engine.getAccountInformation(USER);
+    //     console.log("totalDsctotalDscMintedAfterMinted", totalDscMintedAfter);
+    //     console.log("collateralValueInUsdAfter", collateralValueInUsdAfter);
+
+    //     address liquidatorAddress = makeAddr("liquidator");
+    //     vm.startPrank(liquidatorAddress);
+    //     ERC20Mock(weth).mint(liquidatorAddress, 1e30);
+    //     DecentralizedStableCoin(address(engine.i_dsc())).approve(address(engine), 1e21);
+    //     engine.depositCollateralAndMintDsc(weth, 1e20, 1e22);
+    //     engine.liquidate(weth, USER, 1e21);
+    //     vm.stopPrank();
+
+    //     vm.prank(USER);
+    //     uint256 healthFactorAfterLiquidation = engine.gethHealthFactor();
+    //     console.log("expectedHealthFactor", healthFactorAfterLiquidation);
     // }
+
+    function testIfHealthFactorIsntImprovedAfterLiquidation() public depositCollateral_WETH_AndMintDsc {
+        
+        //drops price and healthFactor drops below 1e18
+        helperConfig.updateETHPrice(1e17);
+            
+        vm.prank(USER);
+        uint256 startingUserHealthFactor = engine.gethHealthFactor();
+        console.log("initialHealthFactor", startingUserHealthFactor);
+        (uint256 totalDscMintedBefore, uint256 collateralValueInUsBefore) = engine.getAccountInformation(USER);
+        console.log("totalDscMintedBefore", totalDscMintedBefore);
+        console.log("collateralValueInUsBefore", collateralValueInUsBefore);
+
+        address liquidatorAddress = makeAddr("liquidator");
+        vm.startPrank(liquidatorAddress);
+        ERC20Mock(weth).mint(liquidatorAddress, 1e30);
+         // Approve DSCEngine to spend WETH
+        ERC20Mock(weth).approve(address(engine), 1e25);
+        DecentralizedStableCoin(address(engine.i_dsc())).approve(address(engine), 1e21);
+        engine.depositCollateralAndMintDsc(weth, 1e25, 1e22);
+        engine.liquidate(weth, USER, 1e21);
+        vm.stopPrank();
+
+        vm.prank(USER);
+        uint256 healthFactorAfterLiquidation = engine.gethHealthFactor();
+        console.log("healthFactorAfterLiquidation", healthFactorAfterLiquidation);
+
+        (uint256 totalDscMintedAfter, uint256 collateralValueInUsdAfter) = engine.getAccountInformation(USER);
+        console.log("totalDsctotalDscMintedAfterMinted", totalDscMintedAfter);
+        console.log("collateralValueInUsdAfter", collateralValueInUsdAfter);
+        
+        // assertLe(healthFactorAfterLiquidation, startingUserHealthFactor, "reason");
+    }
 }
