@@ -252,25 +252,25 @@ contract DSCEngineTest is Test {
     }
 
     function testIfHealthFactorIsntImprovedAfterLiquidation() public depositCollateral_WETH_AndMintDsc {
-        // console.log("AMOUNT_COLLATERAL", AMOUNT_COLLATERAL);
-        // console.log("price", ethPrice);
+        console.log("AMOUNT_COLLATERAL", AMOUNT_COLLATERAL);
+        console.log("price", ethPrice);
 
-        // uint256 testVar = 565e15;
-        // console.log("testVar", testVar);
+        uint256 testVar = 565e15;
+        console.log("testVar", testVar);
 
-        // vm.prank(USER);
-        // uint256 preDropStartingUserHealthFactor = engine.gethHealthFactor();
-        // console.log("preDropStartingUserHealthFactor", preDropStartingUserHealthFactor);
+        vm.prank(USER);
+        uint256 preDropStartingUserHealthFactor = engine.gethHealthFactor();
+        console.log("preDropStartingUserHealthFactor", preDropStartingUserHealthFactor);
 
         //price drops by 30 percent, health factor should drop by 30 percent, thus fall of 1e18
         helperConfig.updateETHPrice(7e17);
 
-        // vm.prank(USER);
-        // uint256 startingUserHealthFactor = engine.gethHealthFactor();
-        // console.log("initialHealthFactor", startingUserHealthFactor);
-        // (uint256 totalDscMintedBefore, uint256 collateralValueInUsBefore) = engine.getAccountInformation(USER);
-        // console.log("totalDscMintedBefore", totalDscMintedBefore);
-        // console.log("collateralValueInUsBefore", collateralValueInUsBefore);
+        vm.prank(USER);
+        uint256 startingUserHealthFactor = engine.gethHealthFactor();
+        console.log("initialHealthFactor", startingUserHealthFactor);
+        (uint256 totalDscMintedBefore, uint256 collateralValueInUsBefore) = engine.getAccountInformation(USER);
+        console.log("totalDscMintedBefore", totalDscMintedBefore);
+        console.log("collateralValueInUsBefore", collateralValueInUsBefore);
 
         address liquidatorAddress = makeAddr("liquidator");
         vm.startPrank(liquidatorAddress);
@@ -282,12 +282,12 @@ contract DSCEngineTest is Test {
         engine.liquidate(weth, USER, 1e22);
         vm.stopPrank();
 
-        // vm.prank(USER);
-        // uint256 healthFactorAfterLiquidation = engine.gethHealthFactor();
-        // console.log("healthFactorAfterLiquidation", healthFactorAfterLiquidation);
+        vm.prank(USER);
+        uint256 healthFactorAfterLiquidation = engine.gethHealthFactor();
+        console.log("healthFactorAfterLiquidation", healthFactorAfterLiquidation);
 
-        // (uint256 totalDscMintedAfter, uint256 collateralValueInUsdAfter) = engine.getAccountInformation(USER);
-        // console.log("totalDsctotalDscMintedAfterMinted", totalDscMintedAfter);
-        // console.log("collateralValueInUsdAfter", collateralValueInUsdAfter);
+        (uint256 totalDscMintedAfter, uint256 collateralValueInUsdAfter) = engine.getAccountInformation(USER);
+        console.log("totalDsctotalDscMintedAfterMinted", totalDscMintedAfter);
+        console.log("collateralValueInUsdAfter", collateralValueInUsdAfter);
     }
 }

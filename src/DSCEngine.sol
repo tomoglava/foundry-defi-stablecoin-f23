@@ -275,7 +275,7 @@ contract DSCEngine is ReentrancyGuard {
         _burnDsc(debtToCover, user, msg.sender);
 
         uint256 engdingUserHealthFactor = _healthFactor(user);
-        if (engdingUserHealthFactor >= startingUserHealthFactor) {
+        if (engdingUserHealthFactor <= startingUserHealthFactor) {
             revert DSCEngine__HealthFactorNitImproved();
         }
         _revertIfHealthFactorIsBroken(msg.sender);
@@ -333,7 +333,7 @@ contract DSCEngine is ReentrancyGuard {
     function _healthFactor(address user) private view returns (uint256) {
         (uint256 totalDscMinted, uint256 collateralValueInUsd) = _getAccountInformation(user);
         if (totalDscMinted == 0) {
-            return 0;
+            return type(uint256).max;
         } else {
             uint256 collateralAdjustedForThreshold =
                 (collateralValueInUsd * LIQUIDATION_THRESHOLD) / LIQUIDATION_PRECISION;
