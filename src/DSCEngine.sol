@@ -29,6 +29,7 @@ import {DecentralizedStableCoin} from "./DecentralizedStableCoin.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
+import {OracleLib} from "./libraries/OracleLib.sol";
 
 /**
  * @title DSCEngine
@@ -60,6 +61,11 @@ contract DSCEngine is ReentrancyGuard {
     error DSCEngine__TransferFailed();
     error DSCEngine__HealthFactorOK();
     error DSCEngine__HealthFactorNitImproved();
+
+    ///////////////////////
+    // Type Declarations //
+    ///////////////////////
+    using OracleLib for AggregatorV3Interface;
 
     /////////////////////
     // State Variables //
@@ -379,7 +385,7 @@ contract DSCEngine is ReentrancyGuard {
 
     function getUsdValue(address token, uint256 amount) public view returns (uint256) {
         AggregatorV3Interface priceFeed = AggregatorV3Interface(s_priceFeeds[token]);
-        (, int256 price,,,) = priceFeed.latestRoundData();
+        (, int256 price,,,) = priceFeed.staleCheckLatestRoundData();
         // eth/usd and btc/usd on chainlink has 8 decimal places so:
         // it 1 eth = $1000
         // the returned value from chainlink will be 1000 * 10 ** 8 (it is 10 ** 8 = 10^8)
@@ -389,7 +395,7 @@ contract DSCEngine is ReentrancyGuard {
 
     function getTokenAmountFromUsd(address token, uint256 usdAmountInWei) public view returns (uint256) {
         AggregatorV3Interface priceFeed = AggregatorV3Interface(s_priceFeeds[token]);
-        (, int256 price,,,) = priceFeed.latestRoundData();
+        (, int256 price,,,) = priceFeed.staleCheckLatestRoundData();
         // usdAmount * 18 decimals / price_with_8_decimals * 10 decimals
         return (usdAmountInWei * PRECISION) / (uint256(price) * ADDITIONAL_FEED_PRECISION);
     }
@@ -408,5 +414,9 @@ contract DSCEngine is ReentrancyGuard {
 
     function getCollaterallBalanceOfUser(address token, address user) public view returns (uint256) {
         return s_collateralDeposited[user][token];
+    }
+
+    function getCollateralTokenPriceFeed(address token) public view returns (address) {
+        return s_priceFeeds[token];
     }
 }

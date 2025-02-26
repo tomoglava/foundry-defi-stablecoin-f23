@@ -14,3 +14,9 @@ stablecon description
 1. What are out invariants/properties?
     - invariant - proprerty of out system that should always hold!
     - so we can write fuzz tests
+
+
+
+1. Some proper oracle use (done)
+2. Write more test
+3. Smart contract audit preparation

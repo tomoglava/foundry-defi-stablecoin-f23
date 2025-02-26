@@ -6,7 +6,7 @@
 // 1. The total supply of DSC should allways be less than total value of collateral
 // 2. Getter view should never revert <- evergreen invariant
 
-import {Test} from "../../lib/forge-std/src/Test.sol";
+import {Test, console} from "../../lib/forge-std/src/Test.sol";
 import {StdInvariant} from "../../lib/forge-std/src/StdInvariant.sol";
 import {DeployDSC} from "../../script/DeployDSC.s.sol";
 import {DSCEngine} from "../../src/DSCEngine.sol";
@@ -51,6 +51,18 @@ contract Invariants is StdInvariant {
         uint256 wethUSDValue = dscEngine.getUsdValue(weth, totalWethDeposite);
         uint256 wbtcUSDValue = dscEngine.getUsdValue(wbtc, totalWbtcDeposite);
 
+        console.log("totalDscDeposite: ", totalDscDeposite);
+        console.log("totalWethDeposite: ", totalWethDeposite);
+        console.log("totalWbtcDeposite: ", totalWbtcDeposite);
+
         assert(totalDscDeposite <= wethUSDValue + wbtcUSDValue);
+    }
+
+    // every invariant should include
+    function invariant_gettersShouldNotRevert() public view {
+        dscEngine.getCollateralTokens();
+        dscEngine.getUsdValue(weth, 1);
+        dscEngine.getUsdValue(wbtc, 1);
+        dscEngine.gethHealthFactor();
     }
 }
